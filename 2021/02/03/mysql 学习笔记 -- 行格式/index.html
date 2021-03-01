@@ -29,7 +29,7 @@
 <meta property="og:locale">
 <meta property="og:image" content="https://s3.ax1x.com/2021/02/08/yNofwn.png">
 <meta property="article:published_time" content="2021-02-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-02-24T15:48:33.879Z">
+<meta property="article:modified_time" content="2021-03-01T16:45:58.517Z">
 <meta property="article:author" content="Tsai">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://s3.ax1x.com/2021/02/08/yNofwn.png">
@@ -192,7 +192,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-02-24 23:48:33" itemprop="dateModified" datetime="2021-02-24T23:48:33+08:00">2021-02-24</time>
+                <time title="Modified: 2021-03-02 00:45:58" itemprop="dateModified" datetime="2021-03-02T00:45:58+08:00">2021-03-02</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -228,7 +228,13 @@
 <p>其中，COMPACT和REDUNDANT是在早期版本就出现的行格式，而DYNAMIC和COMPRESSED是在较晚的版本中出现的。</p>
 <p>COMPACT、DYNAMIC和COMPRESSED是属于紧凑型的数据结构，而REDUNDANT是属于冗余型的数据结构。REDUNDANT是这四种数据类型中最早出现的，推测后续出现的几种紧凑型数据类型：一、是为了满足存储的时候提高空间的利用率，二、是为了提高扫页时，读入的数据量。</p>
 <h3 id="COMPACT"><a href="#COMPACT" class="headerlink" title="COMPACT"></a>COMPACT</h3><p><img src="https://s3.ax1x.com/2021/02/08/yNofwn.png" alt="https://s3.ax1x.com/2021/02/08/yNofwn.png"></p>
-<h5 id="变长字段长度列表"><a href="#变长字段长度列表" class="headerlink" title="变长字段长度列表"></a>变长字段长度列表</h5><p>变长字段</p>
+<h5 id="变长字段长度列表"><a href="#变长字段长度列表" class="headerlink" title="变长字段长度列表"></a>变长字段长度列表</h5><p>在 Mysql 中，存在一些变长字段类型，比如 VARCHAR、VARBINARY、TEXT 等。类似于 java 中的 字符串，其长度是不定的。所以我们在记录其信息时，需要记录其所含内容的长度，理解应该是便于内存管理和做一些 O(1) 的简单操作。</p>
+<p>在 COMPACT 格式中，所有变长字段的长度属性按照占用字节数的大小逆序排列。</p>
+<p>PS: 变长字段列表不存储值为 NULL 的列的长度。</p>
+<h5 id="NULL-值列表"><a href="#NULL-值列表" class="headerlink" title="NULL 值列表"></a>NULL 值列表</h5><p>主键列和 NOT NULL 的列不会被记录到该字段中。属性为允许 NULL 的列，在 NULL 值列表中按照二进制逆序排列。</p>
+<p>在 NULL 值列表中，其用整数个字节数（8位）的位来表示，高位补0.</p>
+<p>比如现在存在三个列允许位 NULL，那么在存储中，需要三位来表示，基于高位补0的原则，结果为 0 0 0 0 0 X X X，其中 X 是一个抽象的表示。当该列的具体值为 NULL 时，该值为 0，反之为 1.</p>
+<p>假设我们现在存在 col1、col2、col3满足上述场景，此时col1 = 1、col2 IS NULL、col3 = 3，在存储中为 0 0 0 0 0 1 0 1，实际存储值为0x05（以16进制存储）.</p>
 
     </div>
 
@@ -306,7 +312,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#COMPACT"><span class="nav-number">1.</span> <span class="nav-text">COMPACT</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%98%E9%95%BF%E5%AD%97%E6%AE%B5%E9%95%BF%E5%BA%A6%E5%88%97%E8%A1%A8"><span class="nav-number">1.0.1.</span> <span class="nav-text">变长字段长度列表</span></a></li></ol></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#COMPACT"><span class="nav-number">1.</span> <span class="nav-text">COMPACT</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%8F%98%E9%95%BF%E5%AD%97%E6%AE%B5%E9%95%BF%E5%BA%A6%E5%88%97%E8%A1%A8"><span class="nav-number">1.0.1.</span> <span class="nav-text">变长字段长度列表</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#NULL-%E5%80%BC%E5%88%97%E8%A1%A8"><span class="nav-number">1.0.2.</span> <span class="nav-text">NULL 值列表</span></a></li></ol></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
