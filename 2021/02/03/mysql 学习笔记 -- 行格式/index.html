@@ -28,10 +28,11 @@
 <meta property="og:description" content="世上本不存在线条，有的只是人类视知觉对立体转折边缘的概括。">
 <meta property="og:locale">
 <meta property="og:image" content="https://s3.ax1x.com/2021/02/08/yNofwn.png">
-<meta property="og:image" content="https://s3.ax1x.com/2021/03/03/6kLko4.md.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/03/06/6uEr4S.png">
 <meta property="og:image" content="https://s3.ax1x.com/2021/03/04/6ZIdR1.png">
+<meta property="og:image" content="https://s3.ax1x.com/2021/03/06/6ueI4f.png">
 <meta property="article:published_time" content="2021-02-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2021-03-04T16:56:55.695Z">
+<meta property="article:modified_time" content="2021-03-06T11:28:06.618Z">
 <meta property="article:author" content="Tsai">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://s3.ax1x.com/2021/02/08/yNofwn.png">
@@ -194,7 +195,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">Edited on</span>
-                <time title="Modified: 2021-03-05 00:56:55" itemprop="dateModified" datetime="2021-03-05T00:56:55+08:00">2021-03-05</time>
+                <time title="Modified: 2021-03-06 19:28:06" itemprop="dateModified" datetime="2021-03-06T19:28:06+08:00">2021-03-06</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -246,7 +247,7 @@
 <li>next_record：占用 16 位，表示下一条记录的相对位置</li>
 </ul>
 <p>其中前四个属性，并称为 info bit。</p>
-<h3 id="真实数据"><a href="#真实数据" class="headerlink" title="真实数据"></a>真实数据</h3><p><img src="https://s3.ax1x.com/2021/03/03/6kLko4.md.png" alt="6kLko4.md.png"></p>
+<h3 id="真实数据"><a href="#真实数据" class="headerlink" title="真实数据"></a>真实数据</h3><p><img src="https://s3.ax1x.com/2021/03/06/6uEr4S.png" alt="6uEr4S.png"></p>
 <h4 id="隐藏列"><a href="#隐藏列" class="headerlink" title="隐藏列"></a>隐藏列</h4><h5 id="row-id"><a href="#row-id" class="headerlink" title="row_id"></a>row_id</h5><p>该字段不是必需存在的，在整个结构中，其占用 6 字节的大小，其作用是用作每一行的唯一标识。<br>其实这个字段跟 InnoDB 的主键生成策略有关：</p>
 <ul>
 <li>优先使用用户自定义的主键为主键</li>
@@ -269,6 +270,10 @@
 <li>1byte_offs_flag：标记字段长度偏移列表中每个列对应的偏移量使用的是 1 字节还是 2 字节</li>
 <li>next_record：占用 16 位，表示下一条记录的相对位置</li>
 </ul>
+<h2 id="关于溢出"><a href="#关于溢出" class="headerlink" title="关于溢出"></a>关于溢出</h2><p>在 InnoDB 引擎中，页是磁盘与内存交互的基本单位，在默认参数中，一个页的大小是 16 KB，假设我们此时一条记录将占用 32 KB大小的空间，那么一个单位页肯定是存储不下的，这个时候就会发生<code>溢出</code>。<br>在 COMPACT 和 REDUNDANT 格式中，如果发生了上述的场景，那么会将该数据分散存储，在<code>记录的真实数据</code>中会记录该数据分段后，每一段存在的其他页的地址。</p>
+<p><img src="https://s3.ax1x.com/2021/03/06/6ueI4f.png" alt="6ueI4f.png"></p>
+<h2 id="DYNAMIC-和-COMPRESSED"><a href="#DYNAMIC-和-COMPRESSED" class="headerlink" title="DYNAMIC 和 COMPRESSED"></a>DYNAMIC 和 COMPRESSED</h2><p>其实按照 Mysql 的发展来说，REDUNDANT 格式是最早出现的，然后在 5.1 版本替换成 COMPACT，在 5.7版本中，行格式替换成了 DYNAMIC。（至于 COMPRESSED 格式的使用，并没有找到相关的资料）。<br>这两个格式与 COMPACT 相似，但是也有不同。当发生溢出时，两种行格式只会在真实数据中记录溢出页的地址，而后真实数据全部记录在溢出页中（溢出页，也就是上图所画的其他页）。此外， COMPRESSED 格式还会采取压缩算法。可以看到在行格式的发展中，为了提高内存和磁盘的使用率，会将结构设计的越发紧凑，且便于压缩。</p>
+<h2 id="题外话"><a href="#题外话" class="headerlink" title="题外话"></a>题外话</h2><p>Sketch 是一个好的画图软件，但是用起来并不是很顺手，后续慢慢开发其他的替代品吧。感觉写博客就是和尚敲钟，静得下心来，不追求功名才能有所回报。</p>
 
     </div>
 
@@ -346,7 +351,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
-          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#COMPACT"><span class="nav-number">1.</span> <span class="nav-text">COMPACT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%95%BF%E5%AD%97%E6%AE%B5%E9%95%BF%E5%BA%A6%E5%88%97%E8%A1%A8"><span class="nav-number">1.1.</span> <span class="nav-text">变长字段长度列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NULL-%E5%80%BC%E5%88%97%E8%A1%A8"><span class="nav-number">1.2.</span> <span class="nav-text">NULL 值列表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%98%E7%96%91"><span class="nav-number">1.2.1.</span> <span class="nav-text">存疑</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%A4%B4%E4%BF%A1%E6%81%AF"><span class="nav-number">1.3.</span> <span class="nav-text">记录头信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E5%AE%9E%E6%95%B0%E6%8D%AE"><span class="nav-number">1.4.</span> <span class="nav-text">真实数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9A%90%E8%97%8F%E5%88%97"><span class="nav-number">1.4.1.</span> <span class="nav-text">隐藏列</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#row-id"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">row_id</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#trx-id"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">trx_id</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#roll-pointer"><span class="nav-number">1.4.1.3.</span> <span class="nav-text">roll_pointer</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#REDUNDANT"><span class="nav-number">2.</span> <span class="nav-text">REDUNDANT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5%E9%95%BF%E5%BA%A6%E5%81%8F%E7%A7%BB%E5%88%97%E8%A1%A8"><span class="nav-number">2.1.</span> <span class="nav-text">字段长度偏移列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%A4%B4%E4%BF%A1%E6%81%AF-1"><span class="nav-number">2.2.</span> <span class="nav-text">记录头信息</span></a></li></ol></li></ol></div>
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#COMPACT"><span class="nav-number">1.</span> <span class="nav-text">COMPACT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%98%E9%95%BF%E5%AD%97%E6%AE%B5%E9%95%BF%E5%BA%A6%E5%88%97%E8%A1%A8"><span class="nav-number">1.1.</span> <span class="nav-text">变长字段长度列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#NULL-%E5%80%BC%E5%88%97%E8%A1%A8"><span class="nav-number">1.2.</span> <span class="nav-text">NULL 值列表</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AD%98%E7%96%91"><span class="nav-number">1.2.1.</span> <span class="nav-text">存疑</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%A4%B4%E4%BF%A1%E6%81%AF"><span class="nav-number">1.3.</span> <span class="nav-text">记录头信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%9C%9F%E5%AE%9E%E6%95%B0%E6%8D%AE"><span class="nav-number">1.4.</span> <span class="nav-text">真实数据</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9A%90%E8%97%8F%E5%88%97"><span class="nav-number">1.4.1.</span> <span class="nav-text">隐藏列</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#row-id"><span class="nav-number">1.4.1.1.</span> <span class="nav-text">row_id</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#trx-id"><span class="nav-number">1.4.1.2.</span> <span class="nav-text">trx_id</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#roll-pointer"><span class="nav-number">1.4.1.3.</span> <span class="nav-text">roll_pointer</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#REDUNDANT"><span class="nav-number">2.</span> <span class="nav-text">REDUNDANT</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%97%E6%AE%B5%E9%95%BF%E5%BA%A6%E5%81%8F%E7%A7%BB%E5%88%97%E8%A1%A8"><span class="nav-number">2.1.</span> <span class="nav-text">字段长度偏移列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%B0%E5%BD%95%E5%A4%B4%E4%BF%A1%E6%81%AF-1"><span class="nav-number">2.2.</span> <span class="nav-text">记录头信息</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B3%E4%BA%8E%E6%BA%A2%E5%87%BA"><span class="nav-number">3.</span> <span class="nav-text">关于溢出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DYNAMIC-%E5%92%8C-COMPRESSED"><span class="nav-number">4.</span> <span class="nav-text">DYNAMIC 和 COMPRESSED</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%98%E5%A4%96%E8%AF%9D"><span class="nav-number">5.</span> <span class="nav-text">题外话</span></a></li></ol></div>
       </div>
       <!--/noindex-->
 
